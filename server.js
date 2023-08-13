@@ -8,6 +8,7 @@ const Bill=require('./models/payment')
 const port=8000
 const PDFDocument = require('pdfkit');
 const fs = require('fs');
+const qr=require('qrcode')
 
 app.use(cors());
 app.use(express.json())
@@ -106,16 +107,21 @@ app.get('/bill/:billId/pdf', async (req, res) => {
       const stream = fs.createWriteStream(filePath);
   
       doc.pipe(stream);
-  
-      doc.fontSize(24).text('GetPass Purchase Bill', { align: 'center',lineGap: 40 });
-      doc.fontSize(14).text(`Bill No.: ${bill.bill_no}`, { lineGap: 10 });
-      doc.fontSize(14).text(`Name: ${bill.name}`, { lineGap: 10 });
-      doc.fontSize(14).text(`Boarding Point: ${bill.boarding_point}`, { lineGap: 10 });
-      doc.fontSize(14).text(`Destination Point: ${bill.destination_point}`, { lineGap: 10 });
-      doc.fontSize(14).text(`Bus No.: ${bill.bus_no}`, { lineGap: 10 });
-      doc.fontSize(14).text(`Number of tickets: ${bill.No_of_tickets}`, { lineGap: 10 });
-      doc.fontSize(14).text(`Amount: Rs.${bill.price}`, { lineGap: 10 });
-  
+      const qrCodeData = 'http://localhost:3000/userhomepage';
+      qr.toDataURL(qrCodeData, { type: 'pdf' });
+      doc.image('./models/Public/Images/Getpass logo.png', {fit: [90, 90],align:'left',continued:true} );
+      doc.fontSize(20).text('GETPASS PURCHASE BILL', { align: 'right',lineGap: 10, });
+      doc.fontSize(10).text('____________________________________________________________________________________',{lineGap:30})
+      doc.fontSize(14).text(`Bill No. : ${bill.bill_no}`, { continued:true});
+      doc.fontSize(14).text(`                                                                  NAME: ${bill.name}`, { left:'100px',lineGap: 50 });
+      doc.fontSize(14).text(`BOARDING POINT : ${bill.boarding_point}`, { lineGap: 20 });
+      doc.fontSize(14).text(`DESTINATION POINT : ${bill.destination_point}`, { lineGap: 50 });
+      doc.fontSize(14).text(`Bus No. : ${bill.bus_no}`, { lineGap: 20 });
+      doc.fontSize(14).text(`Number of tickets : ${bill.No_of_tickets}`, { lineGap: 50 });
+      doc.fontSize(14).text(`AMOUNT : Rs.${bill.price}`, { lineGap: 230,align:'right' });
+      doc.fontSize(10).text('____________________________________________________________________________________')
+      doc.fontSize(10).text('Page 1                                                                                                                                        GetPass', { lineGap: 10 });    
+   
       doc.end();
   
       stream.on('finish', () => {
